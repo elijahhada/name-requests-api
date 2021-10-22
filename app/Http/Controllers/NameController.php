@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\NameStoreRequest;
 use App\Mail\NotifyUser;
 use App\Models\Name;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -76,12 +77,13 @@ class NameController extends Controller
     }
 
     public function filtered(Request $request) {
+        
         try {
             $data = $request->all();
-            $result = Name::with(['status' => function ($query) use($data){
-                $query->where('id', $data['status_id']);
-            }])
-            ->where('name', 'like', '%' . $data['name'] . '%')
+            $result = Name::with('status')
+            ->byName($data['name'])
+            ->byStatus($data['status_id'])
+            ->byDate($data['date'])
             ->get();
             $response = [
                 'success' => true,
